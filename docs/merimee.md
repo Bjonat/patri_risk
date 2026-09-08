@@ -62,6 +62,8 @@ L'URL stable data.gouv redirige vers le stockage du ministère. patri_risk conse
 - Une inversion évidente lat/lon n'est pas corrigée : coordonnées mises à `None` + anomalie.
 - `Date_de_la_derniere_mise_a_jour` est une date civile de notice (`YYYY-MM-DD`). Elle n'est pas copiée dans `SourceDonnee.date_mise_a_jour_source`, qui décrit le snapshot national.
 - Une cellule vide ne produit aucune preuve.
+- Certains libellés de protection contiennent le caractère Unicode
+  U+0085 (NEXT LINE). Le JSONL l'échappe pour rester une ligne par dossier.
 
 ## Références
 

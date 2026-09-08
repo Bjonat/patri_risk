@@ -41,13 +41,21 @@ def chemin_manifeste_associe(chemin_csv: Path) -> Path:
     return Path(chemin_csv).with_suffix(".manifeste.json")
 
 
+def _securiser_jsonl(texte: str) -> str:
+    """Évite que U+0085 / U+2028 / U+2029 cassent un lecteur JSONL."""
+    return (
+        texte.replace("\u0085", "\\u0085")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+
+
 def _ecrire_jsonl(chemin: Path, lignes: list[str]) -> None:
     chemin.parent.mkdir(parents=True, exist_ok=True)
     with chemin.open("w", encoding="utf-8", newline="\n") as fichier:
         for ligne in lignes:
-            fichier.write(ligne)
-            if not ligne.endswith("\n"):
-                fichier.write("\n")
+            fichier.write(_securiser_jsonl(ligne.rstrip("\n")))
+            fichier.write("\n")
 
 
 def normaliser_fichier_merimee(

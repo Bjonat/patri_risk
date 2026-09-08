@@ -196,6 +196,18 @@ def test_pipeline_filtre_hors_departement(tmp_path: Path) -> None:
     assert rapport.nombre_lignes_total > rapport.nombre_lignes_departement
 
 
+def test_jsonl_ne_se_casse_pas_sur_un_separateur_unicode(tmp_path: Path) -> None:
+    import json
+
+    from patri_risk.sources.merimee.pipeline import _ecrire_jsonl
+
+    payload = '{"valeur": "fontaine, bassin\u0085, jardin"}'
+    _ecrire_jsonl(tmp_path / "x.jsonl", [payload])
+    ligne = (tmp_path / "x.jsonl").read_text(encoding="utf-8").split("\n")[0]
+    relu = json.loads(ligne)
+    assert "bassin" in relu["valeur"]
+
+
 def test_charger_manifeste_sidecar(tmp_path: Path) -> None:
     manifeste = _manifeste_pour(FIXTURE)
     chemin = tmp_path / "x.manifeste.json"
