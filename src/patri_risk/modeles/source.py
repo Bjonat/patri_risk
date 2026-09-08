@@ -49,6 +49,14 @@ class SourceDonnee(BaseModel):
             "sans précision inventée."
         ),
     )
+    empreinte_artefact: str | None = Field(
+        default=None,
+        description=(
+            "Empreinte de l'artefact collecté, au format sha256:<hex>, "
+            "pour relier la preuve au snapshot exact."
+        ),
+        pattern=r"^sha256:[0-9a-f]{64}$",
+    )
 
     @field_validator("date_collecte")
     @classmethod
