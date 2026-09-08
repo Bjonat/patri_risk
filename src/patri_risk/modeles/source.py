@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
+
+from patri_risk.modeles.temporel import DateOuInstant, normaliser_instant_utc
 
 
 class SourceDonnee(BaseModel):
@@ -30,16 +33,28 @@ class SourceDonnee(BaseModel):
         description="URL d'origine lorsqu'elle est connue et stable.",
     )
     date_collecte: AwareDatetime = Field(
-        description="Instant auquel la donnée a été collectée par le système (UTC).",
+        description=(
+            "Instant auquel patri_risk a collecté la donnée, "
+            "timezone-aware et normalisé UTC."
+        ),
     )
     licence: str | None = Field(
         default=None,
         description="Licence de réutilisation indiquée par la source, si connue.",
     )
-    date_mise_a_jour_source: AwareDatetime | None = Field(
+    date_mise_a_jour_source: DateOuInstant | None = Field(
         default=None,
-        description="Date de mise à jour déclarée par la source, si disponible.",
+        description=(
+            "Date ou instant de mise à jour annoncé par la source, "
+            "sans précision inventée."
+        ),
     )
+
+    @field_validator("date_collecte")
+    @classmethod
+    def convertir_date_collecte_en_utc(cls, valeur: datetime) -> datetime:
+        """Normalise l'instant de collecte en UTC."""
+        return normaliser_instant_utc(valeur)
 
 
 class EnregistrementBrut(BaseModel):

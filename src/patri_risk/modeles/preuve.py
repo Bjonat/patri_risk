@@ -5,9 +5,10 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from patri_risk.modeles.source import SourceDonnee
+from patri_risk.modeles.temporel import DateOuInstant
 
 
 class MethodeObtention(StrEnum):
@@ -50,10 +51,11 @@ class Preuve(BaseModel):
             "comprise entre 0 et 1."
         ),
     )
-    date_observation: AwareDatetime | None = Field(
+    date_observation: DateOuInstant | None = Field(
         default=None,
         description=(
-            "Date du fait lorsque la source la fournit ; distincte de date_collecte."
+            "Date civile ou instant du fait, selon la précision réelle de la "
+            "source ; distincte de date_collecte. Jamais une heure inventée."
         ),
     )
     notes: str | None = Field(

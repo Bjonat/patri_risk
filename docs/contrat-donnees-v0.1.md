@@ -76,16 +76,17 @@ L'identité de travail est `IdentiteMonument`.
 
 | Champ | Règle |
 | --- | --- |
-| `reference` | obligatoire ; identifiant patrimonial principal, en pratique la référence Mérimée `PA…` |
+| `reference` | obligatoire ; identifiant patrimonial principal. Le format n'est pas imposé par le modèle ; la validation d'un motif Mérimée `PA…` appartient à l'adaptateur |
 | `nom` | optionnel ; jamais un identifiant |
 | `nom_commune` | optionnel |
-| `code_commune` | optionnel ; peut être ancien ou devoir être contrôlé |
+| `code_commune` | optionnel ; code commune INSEE courant lorsqu'il est connu ; jamais remplacé silencieusement par un code historique |
 | `code_departement` | optionnel ; `"31"` pour la Haute-Garonne |
-| `latitude` / `longitude` | optionnels ; renseignés ensemble ou absents tous les deux |
+| `latitude` / `longitude` | optionnels ; WGS84 / EPSG:4326 ; renseignés ensemble ou absents tous les deux |
 
 Principes :
 
 - un monument peut avoir une localisation manquante ;
+- une localisation manquante reste une information manquante : pas de géocodage, de correction ni de déduction depuis l'adresse ou la commune ;
 - un monument ne correspond pas forcément à un unique bâtiment
   géométrique ;
 - plusieurs preuves de sources distinctes peuvent coexister autour de
@@ -131,16 +132,31 @@ officiel.
 
 ## 11.7 Temporalité
 
-Trois instants peuvent coexister. Ils ne sont pas interchangeables.
+Trois informations temporelles peuvent coexister. Elles ne sont pas
+interchangeables et n'ont pas la même précision.
 
-| Notion | Où | Sens |
-| --- | --- | --- |
-| `date_collecte` | `SourceDonnee` | moment où le système a obtenu l'enregistrement |
-| `date_observation` | `Preuve` | date du fait, si la source la fournit |
-| `date_mise_a_jour_source` | `SourceDonnee` | date de mise à jour déclarée par la source, si disponible |
+| Notion | Où | Sens | Précision |
+| --- | --- | --- | --- |
+| `date_collecte` | `SourceDonnee` | instant précis auquel patri_risk a collecté l'enregistrement | timezone-aware, normalisé UTC |
+| `date_observation` | `Preuve` | date ou instant du fait, selon la précision réelle de la source | `date` ou instant aware, ou absente |
+| `date_mise_a_jour_source` | `SourceDonnee` | date ou instant annoncé par la source | `date` ou instant aware, ou absente |
 
-Si la source ne donne pas la date du fait, `date_observation` reste
-vide. On ne la remplit pas avec `date_collecte`.
+`date_collecte` est toujours un horodatage : le système sait réellement
+quand il a obtenu la donnée.
+
+`date_observation` et `date_mise_a_jour_source` conservent la
+précision fournie. Une source qui ne connaît que le jour (ex.
+`2025-01-14`) reste au niveau du jour. Une source qui fournit un
+véritable timestamp conserve cet instant. Le type partagé
+`DateOuInstant` formalise cette union.
+
+> Le système ne doit jamais fabriquer une heure, un fuseau ou une
+> précision temporelle absente de la source.
+
+En particulier, une date civile ne doit jamais être transformée en
+`2025-01-14T00:00:00Z`. Si la source ne donne pas la date du fait,
+`date_observation` reste vide. On ne la remplit pas avec
+`date_collecte`.
 
 ## 11.8 Données absentes
 
