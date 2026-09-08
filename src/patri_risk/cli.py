@@ -149,7 +149,8 @@ def executer_normalisation(
     print(f"Département : {rapport.departement}")
     print(f"Lignes nationales : {_formater_entier(rapport.nombre_lignes_total)}")
     print(
-        f"Lignes Haute-Garonne : {_formater_entier(rapport.nombre_lignes_departement)}"
+        f"Lignes du département {rapport.departement} : "
+        f"{_formater_entier(rapport.nombre_lignes_departement)}"
     )
     dossiers = _formater_entier(rapport.nombre_dossiers_produits)
     print(f"Dossiers produits : {dossiers}")

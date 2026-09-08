@@ -18,10 +18,13 @@ from patri_risk.sources.merimee.constantes import (
     DEPARTEMENT_REFERENCE,
     URL_RESSOURCE,
 )
+from patri_risk.sources.merimee.integrite import verifier_integrite_artefact
 from patri_risk.sources.merimee.lecture import (
     appartient_au_departement,
+    detecter_colonne_code_insee,
     extraire_cellule,
     iterer_lignes_merimee,
+    lire_noms_colonnes,
 )
 from patri_risk.sources.merimee.normalisation import (
     construire_source,
@@ -66,9 +69,10 @@ def normaliser_fichier_merimee(
     repertoire_sortie: Path,
 ) -> RapportIngestionMerimee:
     """Normalise un snapshot local. Aucun accès réseau."""
+    verifier_integrite_artefact(chemin_csv, manifeste)
     departement = departement.strip()
     repertoire_sortie = Path(repertoire_sortie)
-    repertoire_sortie.mkdir(parents=True, exist_ok=True)
+    colonne_code_insee = detecter_colonne_code_insee(lire_noms_colonnes(chemin_csv))
 
     source_commune = construire_source(
         identifiant_enregistrement=None,
@@ -98,13 +102,16 @@ def normaliser_fichier_merimee(
     nombre_references_inattendues = 0
     nombre_coordonnees_absentes = 0
     nombre_coordonnees_invalides = 0
+    nombre_codes_commune_absents = 0
     references_dupliquees: list[str] = []
     lignes_quarantaine = 0
 
     for numero, contenu in sans_reference:
         enregistrement = EnregistrementBrut(source=source_commune, contenu=contenu)
         _dossier, anomalies_ligne = normaliser_enregistrement_merimee(
-            enregistrement, numero_ligne=numero
+            enregistrement,
+            numero_ligne=numero,
+            colonne_code_insee=colonne_code_insee,
         )
         anomalies.extend(anomalies_ligne)
 
@@ -134,7 +141,9 @@ def normaliser_fichier_merimee(
             contenu=contenu,
         )
         dossier, anomalies_ligne = normaliser_enregistrement_merimee(
-            enregistrement, numero_ligne=numero
+            enregistrement,
+            numero_ligne=numero,
+            colonne_code_insee=colonne_code_insee,
         )
         for anomalie in anomalies_ligne:
             anomalies.append(anomalie)
@@ -146,6 +155,8 @@ def normaliser_fichier_merimee(
             continue
         if extraire_cellule(contenu, CHAMP_COORDONNEES) is None:
             nombre_coordonnees_absentes += 1
+        if dossier.identite.code_commune is None:
+            nombre_codes_commune_absents += 1
         dossiers.append(dossier)
 
     dossiers.sort(key=lambda dossier: dossier.identite.reference)
@@ -174,12 +185,12 @@ def normaliser_fichier_merimee(
         nombre_references_format_inattendu=nombre_references_inattendues,
         nombre_coordonnees_absentes=nombre_coordonnees_absentes,
         nombre_coordonnees_invalides=nombre_coordonnees_invalides,
-        nombre_codes_commune_absents=len(dossiers),
+        nombre_codes_commune_absents=nombre_codes_commune_absents,
         nombre_doublons_reference=len(references_dupliquees),
         nombre_lignes_en_quarantaine=lignes_quarantaine,
         nombre_anomalies=len(anomalies),
         references_dupliquees=references_dupliquees,
-        colonne_code_insee_absente=True,
+        colonne_code_insee_absente=colonne_code_insee is None,
         empreinte_sha256=manifeste.empreinte_sha256,
     )
     (repertoire_sortie / "rapport.json").write_text(

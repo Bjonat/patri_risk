@@ -8,6 +8,7 @@ from pathlib import Path
 
 from patri_risk.exceptions import ErreurUtilisateur
 from patri_risk.sources.merimee.constantes import (
+    CHAMP_CODE_INSEE_COURANT,
     CHAMP_DEPARTEMENT,
     COLONNES_OBLIGATOIRES,
     ENCODAGE,
@@ -47,6 +48,30 @@ def verifier_colonnes(noms: list[str] | None) -> None:
         raise ErreurUtilisateur(
             f'La colonne obligatoire "{absentes[0]}" est absente du CSV.'
         )
+
+
+def lire_noms_colonnes(chemin: Path) -> list[str]:
+    """Lit uniquement l'en-tête du CSV."""
+    chemin = Path(chemin)
+    if not chemin.is_file():
+        raise ErreurUtilisateur("Le fichier Mérimée est introuvable.")
+    with chemin.open(encoding=ENCODAGE, newline="") as fichier:
+        lecteur = csv.DictReader(fichier, delimiter=SEPARATEUR)
+        verifier_colonnes(lecteur.fieldnames)
+        return list(lecteur.fieldnames or [])
+
+
+def detecter_colonne_code_insee(noms: list[str] | None) -> str | None:
+    """Retourne le nom de colonne du code INSEE courant s'il est présent.
+
+    Le snapshot inspecté le 8 septembre 2026 n'a pas cette colonne.
+    ``Code_Insee`` est un candidat de schéma, pas une observation de ce millésime.
+    """
+    if not noms:
+        return None
+    if CHAMP_CODE_INSEE_COURANT in noms:
+        return CHAMP_CODE_INSEE_COURANT
+    return None
 
 
 def iterer_lignes_merimee(

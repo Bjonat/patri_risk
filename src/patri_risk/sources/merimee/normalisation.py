@@ -171,6 +171,7 @@ def normaliser_enregistrement_merimee(
     enregistrement: EnregistrementBrut,
     *,
     numero_ligne: int | None = None,
+    colonne_code_insee: str | None = None,
 ) -> tuple[DossierMonument | None, list[AnomalieIngestion]]:
     """Transforme une ligne brute en dossier, sans inventer de fait."""
     anomalies: list[AnomalieIngestion] = []
@@ -220,7 +221,9 @@ def normaliser_enregistrement_merimee(
         reference=reference,
         nom=choisir_nom(contenu),
         nom_commune=extraire_cellule(contenu, CHAMP_COMMUNE),
-        code_commune=None,
+        code_commune=extraire_cellule(contenu, colonne_code_insee)
+        if colonne_code_insee
+        else None,
         code_departement=extraire_cellule(contenu, CHAMP_DEPARTEMENT),
         latitude=latitude,
         longitude=longitude,

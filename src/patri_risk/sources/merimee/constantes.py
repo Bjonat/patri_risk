@@ -28,6 +28,9 @@ CHAMP_DENOMINATION = "Denomination_de_l_edifice"
 CHAMP_COMMUNE = "Commune_forme_editoriale"
 CHAMP_DEPARTEMENT = "Departement_format_numerique"
 CHAMP_COG_PROTECTION = "COG_Insee_lors_de_la_protection"
+# Candidat de schéma, non observé dans le snapshot du 8 septembre 2026.
+# Ne pas le confondre avec COG_Insee_lors_de_la_protection.
+CHAMP_CODE_INSEE_COURANT = "Code_Insee"
 CHAMP_COORDONNEES = "coordonnees_au_format_WGS84"
 CHAMP_NATURE_PROTECTION = "Nature_de_la_protection"
 CHAMP_DATE_TYPOLOGIE_PROTECTION = "Date_et_typologie_de_la_protection"
@@ -44,8 +47,8 @@ CHAMP_DATE_CREATION_NOTICE = "Date_de_creation_de_la_notice"
 
 COLONNES_OBLIGATOIRES = (CHAMP_REFERENCE, CHAMP_DEPARTEMENT)
 
-# Le CSV officiel n'expose pas de colonne « Code Insee » courant.
-# code_commune reste donc vide en PR-1 ; le COG historique est une preuve.
+# Le COG historique est une preuve distincte. Le code commune courant n'est
+# lu que si CHAMP_CODE_INSEE_COURANT est réellement présent dans l'en-tête.
 CHAMP_PREUVE_PAR_COLONNE: tuple[tuple[str, str], ...] = (
     (CHAMP_NATURE_PROTECTION, "nature_protection"),
     (CHAMP_DATE_TYPOLOGIE_PROTECTION, "date_typologie_protection"),
