@@ -10,10 +10,12 @@ from patri_risk.modeles.preuve import Preuve
 class IdentiteMonument(BaseModel):
     """Identité de travail d'un immeuble protégé au titre des monuments historiques.
 
-    ``reference`` est l'identifiant patrimonial principal, en pratique la
-    référence Mérimée de type ``PA…``. Le nom n'est pas un identifiant.
-    Les coordonnées, le code commune et le nom peuvent manquer. Un monument
-    ne correspond pas nécessairement à un unique bâtiment géométrique.
+    ``reference`` est l'identifiant patrimonial principal. Le format n'est
+    pas imposé ici : la validation propre à une source (ex. Mérimée)
+    appartient à l'adaptateur. Le nom n'est pas un identifiant.
+    Les coordonnées WGS84, le code commune et le nom peuvent manquer. Un
+    monument ne correspond pas nécessairement à un unique bâtiment
+    géométrique.
     """
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
@@ -38,8 +40,18 @@ class IdentiteMonument(BaseModel):
         default=None,
         description="Code département INSEE (ex. 31 pour la Haute-Garonne).",
     )
-    latitude: float | None = Field(default=None, ge=-90, le=90)
-    longitude: float | None = Field(default=None, ge=-180, le=180)
+    latitude: float | None = Field(
+        default=None,
+        ge=-90,
+        le=90,
+        description="Latitude WGS84 (EPSG:4326), si la source en fournit une.",
+    )
+    longitude: float | None = Field(
+        default=None,
+        ge=-180,
+        le=180,
+        description="Longitude WGS84 (EPSG:4326), si la source en fournit une.",
+    )
 
     @model_validator(mode="after")
     def verifier_paire_de_coordonnees(self) -> IdentiteMonument:
@@ -57,8 +69,9 @@ class IdentiteMonument(BaseModel):
 class DossierMonument(BaseModel):
     """Regroupement des preuves accumulées autour d'un même monument.
 
-    Le dossier est un contenant. Il n'interprète pas les preuves et ne
-    calcule aucun indicateur dérivé.
+    Le dossier contient uniquement l'identité et les preuves. Les
+    artefacts sources bruts sont conservés à part par le pipeline
+    d'ingestion. Aucun indicateur dérivé n'est calculé ici.
     """
 
     model_config = ConfigDict(extra="forbid")

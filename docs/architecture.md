@@ -80,11 +80,14 @@ activité de travaux, etc.). Non implémenté.
 `IdentiteMonument` est un index de travail. Les faits qu'il reprend
 (nom, commune, coordonnées) doivent aussi pouvoir exister comme
 `Preuve` lorsqu'ils proviennent d'une source. Le nom n'est jamais un
-identifiant.
+identifiant. `reference` n'impose pas de motif `PA…` : ce contrôle
+appartient à l'adaptateur de la source.
 
-Un monument n'est pas supposé correspondre à un unique bâtiment
-géométrique. Les correspondances spatiales futures devront conserver
-leur `methode_obtention`.
+Les coordonnées normalisées sont en **WGS84 / EPSG:4326**
+(`longitude`, `latitude`). Elles peuvent être absentes. Un monument
+n'est pas supposé correspondre à un unique bâtiment géométrique. Les
+correspondances spatiales futures devront conserver leur
+`methode_obtention`.
 
 ## Ce que chaque preuve doit préserver
 
@@ -104,14 +107,17 @@ Ces éléments rendent possible un audit ultérieur de toute conclusion.
    messages CLI et tests métier sont en français. Les API Python restent
    inchangées.
 2. **Pydantic v2, contrat explicite.** `extra="forbid"` pour détecter
-   les champs inconnus. Les dates de collecte et d'observation sont
-   des `datetime` avec fuseau (UTC).
+   les champs inconnus. `date_collecte` est un instant timezone-aware
+   normalisé UTC. `date_observation` et `date_mise_a_jour_source`
+   acceptent une `date` ou un instant aware (`DateOuInstant`) afin de
+   ne jamais inventer minuit UTC.
 3. **Pas de score dans le dossier.** `DossierMonument` ne contient que
    `identite` et `preuves`. Les indicateurs viendront plus tard, à
    partir des preuves, jamais à la place des preuves.
-4. **`EnregistrementBrut` est ajouté** par rapport à la liste minimale
-   des fichiers : PR-1 doit pouvoir conserver le payload Mérimée sans
-   inventer une quatrième couche.
+4. **Données brutes hors dossier.** `EnregistrementBrut` existe pour
+   représenter un payload original. Il n'est **pas** un champ de
+   `DossierMonument`. À partir de PR-1, l'ingestion conservera
+   séparément l'artefact source brut et un manifeste de collecte.
 5. **CLI volontairement minimale.** `version` et `diagnostic`
    seulement. Aucune commande `analyser` tant qu'aucune analyse n'existe.
 6. **Dépendances limitées.** Runtime : Pydantic v2. Outils : pytest et
@@ -119,14 +125,90 @@ Ces éléments rendent possible un audit ultérieur de toute conclusion.
 7. **`__main__.py`** permet `python -m patri_risk` en plus de la
    commande `patri-risk`.
 
+## Conservation des artefacts bruts
+
+`DossierMonument` reste :
+
+```text
+identité
++
+preuves
+```
+
+Les artefacts sources bruts ne sont pas stockés dans le dossier. À
+partir de PR-1, une ingestion devra conserver **séparément** :
+
+```text
+artefact source brut
++
+manifeste de collecte
+```
+
+Le manifeste devra au minimum permettre de connaître :
+
+```text
+source
+URL ou identifiant de ressource
+date de collecte
+empreinte SHA-256
+taille en octets
+licence lorsque connue
+```
+
+Une preuve pourra ainsi être auditée contre le snapshot exact utilisé
+au moment du traitement. Ce mécanisme n'est pas implémenté dans PR-0.
+
 ## Emplacement des sources
 
 Le paquet `src/patri_risk/sources/` est réservé aux adaptateurs. PR-1
 devrait y ajouter un module Mérimée / POP qui :
 
 1. récupère un enregistrement public ;
-2. le stocke en `EnregistrementBrut` ;
+2. conserve l'artefact brut et son manifeste **en dehors** du dossier ;
 3. produit des `SourceDonnee` et des `Preuve` ;
-4. alimente un `DossierMonument`.
+4. alimente un `DossierMonument` (identité + preuves uniquement).
 
 Aucune de ces étapes n'est exécutée dans PR-0.
+
+## Règles figées pour l'ingestion Mérimée (PR-1)
+
+Ces règles ne sont pas encore implémentées. Elles sont figées pour
+éviter de les ré-inventer dans PR-1.
+
+### Référence
+
+`IdentiteMonument.reference` reste une chaîne libre obligatoire. L'adaptateur
+Mérimée contrôle le format attendu (`PA…`), mais une anomalie de
+référence ne doit pas interrompre toute l'ingestion. Les
+enregistrements anormaux devront pouvoir être comptés et signalés.
+
+### Code commune
+
+Pour Mérimée, le champ `Code Insee` est le candidat utilisé pour
+`code_commune`.
+
+Le champ `COG Insee lors de la protection` est une information
+historique distincte. Il ne doit pas remplacer silencieusement le code
+commune courant.
+
+Si `Code Insee` est absent :
+
+```python
+code_commune = None
+```
+
+La résolution des communes anciennes, fusionnées ou renommées
+viendra dans une phase ultérieure.
+
+### Coordonnées
+
+Les coordonnées de `IdentiteMonument` sont en WGS84 / EPSG:4326
+(`longitude`, `latitude`). Elles peuvent être absentes.
+
+PR-1 ne devra pas :
+
+- géocoder automatiquement un monument absent ;
+- corriger une localisation ;
+- déduire des coordonnées depuis l'adresse ou la commune.
+
+Une localisation manquante reste une information manquante.
