@@ -83,3 +83,31 @@ donnees/traitees/merimee/31/anomalies.jsonl
 ```
 
 Chaque `SourceDonnee` porte `empreinte_artefact = sha256:<hex>` du snapshot.
+
+## Intégrité snapshot / manifeste
+
+`patri-risk merimee normaliser` calcule en flux la taille et le SHA-256 du
+fichier CSV réellement passé à `--fichier`, puis les compare au manifeste.
+Une divergence de taille ou d'empreinte arrête le pipeline avant toute
+normalisation : aucun `monuments.jsonl`, `rapport.json` ni `anomalies.jsonl`
+n'est produit.
+
+Le nom de fichier n'entre pas dans l'identité cryptographique. Un CSV
+renommé est accepté si les octets correspondent au manifeste.
+
+## Code INSEE courant
+
+Le snapshot du 8 septembre 2026 n'a **pas** de colonne de code INSEE courant.
+`code_commune` reste alors `None`, `colonne_code_insee_absente` est `True`,
+et le nombre de codes absents égale le nombre de dossiers.
+
+L'adaptateur reconnaît `Code_Insee` uniquement comme candidat de schéma
+(compatibilité avec la documentation « Code Insee »). Cette colonne n'a
+pas été observée dans le millésime actuel. Si elle apparaît plus tard :
+
+- sa valeur alimente `IdentiteMonument.code_commune` ;
+- une cellule vide reste `None` ;
+- `colonne_code_insee_absente` passe à `False` ;
+- aucun contrôle COG, aucune correction, aucun appel POP.
+
+`COG_Insee_lors_de_la_protection` n'est jamais copié dans `code_commune`.

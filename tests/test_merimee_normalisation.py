@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -225,4 +226,60 @@ def test_coordonnees_valides_dans_le_pipeline(tmp_path: Path) -> None:
     assert rapport.nombre_coordonnees_absentes >= 1
     assert rapport.nombre_coordonnees_invalides >= 2
     assert rapport.nombre_codes_commune_absents == rapport.nombre_dossiers_produits
+    assert rapport.colonne_code_insee_absente is True
     assert extraire_cellule({"x": "  "}, "x") is None
+
+
+def _csv_avec_code_insee(tmp_path: Path) -> Path:
+    chemin = tmp_path / "avec_code.csv"
+    chemin.write_text(
+        "Reference|Departement_format_numerique|"
+        "Titre_editorial_de_la_notice|Commune_forme_editoriale|Code_Insee\n"
+        "PA00094321|31|Basilique Saint-Sernin|Toulouse|31555\n"
+        "PA00094322|31|Hôtel d'Assézat|Toulouse|\n",
+        encoding="utf-8",
+    )
+    return chemin
+
+
+def test_code_insee_lu_si_colonne_presente(tmp_path: Path) -> None:
+    chemin = _csv_avec_code_insee(tmp_path)
+    rapport = normaliser_fichier_merimee(
+        chemin,
+        _manifeste_pour(chemin),
+        repertoire_sortie=tmp_path / "out",
+    )
+    assert rapport.colonne_code_insee_absente is False
+    assert rapport.nombre_codes_commune_absents == 1
+    dossiers = {
+        json.loads(ligne)["identite"]["reference"]: json.loads(ligne)
+        for ligne in (tmp_path / "out" / "monuments.jsonl")
+        .read_text(encoding="utf-8")
+        .split("\n")
+        if ligne
+    }
+    assert dossiers["PA00094321"]["identite"]["code_commune"] == "31555"
+    assert dossiers["PA00094322"]["identite"]["code_commune"] is None
+
+
+def test_cog_protection_n_est_pas_copie_dans_code_commune(tmp_path: Path) -> None:
+    chemin = tmp_path / "cog_seulement.csv"
+    chemin.write_text(
+        "Reference|Departement_format_numerique|"
+        "Code_Insee|COG_Insee_lors_de_la_protection\n"
+        "PA00094321|31||31555\n",
+        encoding="utf-8",
+    )
+    rapport = normaliser_fichier_merimee(
+        chemin,
+        _manifeste_pour(chemin),
+        repertoire_sortie=tmp_path / "out",
+    )
+    assert rapport.colonne_code_insee_absente is False
+    assert rapport.nombre_codes_commune_absents == 1
+    dossier = json.loads(
+        (tmp_path / "out" / "monuments.jsonl")
+        .read_text(encoding="utf-8")
+        .split("\n")[0]
+    )
+    assert dossier["identite"]["code_commune"] is None

@@ -8,7 +8,11 @@ import pytest
 
 from patri_risk.exceptions import ErreurUtilisateur
 from patri_risk.sources.merimee.constantes import ENCODAGE, SEPARATEUR
-from patri_risk.sources.merimee.lecture import iterer_lignes_merimee
+from patri_risk.sources.merimee.lecture import (
+    detecter_colonne_code_insee,
+    iterer_lignes_merimee,
+    lire_noms_colonnes,
+)
 
 FIXTURE = Path(__file__).parent / "fixtures" / "merimee_extrait.csv"
 
@@ -44,6 +48,20 @@ def test_colonne_obligatoire_absente(tmp_path: Path) -> None:
 def test_fichier_introuvable(tmp_path: Path) -> None:
     with pytest.raises(ErreurUtilisateur, match="introuvable"):
         list(iterer_lignes_merimee(tmp_path / "absent.csv"))
+
+
+def test_code_insee_courant_non_detecte_sur_le_schema_actuel() -> None:
+    noms = lire_noms_colonnes(FIXTURE)
+    assert detecter_colonne_code_insee(noms) is None
+    assert "COG_Insee_lors_de_la_protection" in noms
+
+
+def test_code_insee_courant_detecte_si_colonne_presente() -> None:
+    assert detecter_colonne_code_insee(["Reference", "Code_Insee"]) == "Code_Insee"
+    assert (
+        detecter_colonne_code_insee(["Reference", "COG_Insee_lors_de_la_protection"])
+        is None
+    )
 
 
 def test_ligne_vide_ignoree(tmp_path: Path) -> None:
