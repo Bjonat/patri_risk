@@ -53,8 +53,7 @@ class Preuve(BaseModel):
     date_observation: AwareDatetime | None = Field(
         default=None,
         description=(
-            "Date du fait lorsque la source la fournit ; "
-            "distincte de date_collecte."
+            "Date du fait lorsque la source la fournit ; distincte de date_collecte."
         ),
     )
     notes: str | None = Field(

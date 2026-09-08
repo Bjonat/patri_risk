@@ -5,7 +5,12 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from patri_risk.modeles import EnregistrementBrut, MethodeObtention, Preuve, SourceDonnee
+from patri_risk.modeles import (
+    EnregistrementBrut,
+    MethodeObtention,
+    Preuve,
+    SourceDonnee,
+)
 
 
 def test_preuve_accepte_un_niveau_confiance_valide(

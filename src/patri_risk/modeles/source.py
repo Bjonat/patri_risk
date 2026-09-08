@@ -22,8 +22,7 @@ class SourceDonnee(BaseModel):
     identifiant_enregistrement: str | None = Field(
         default=None,
         description=(
-            "Identifiant de l'enregistrement dans la source "
-            "(ex. référence Mérimée)."
+            "Identifiant de l'enregistrement dans la source (ex. référence Mérimée)."
         ),
     )
     url: str | None = Field(
