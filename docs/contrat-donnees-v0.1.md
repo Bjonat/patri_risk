@@ -105,7 +105,12 @@ Chaque preuve doit indiquer sa source. `SourceDonnee` porte :
 - `url` (si une URL d'origine est connue)
 - `date_collecte` (obligatoire)
 - `licence` (si connue)
-- `date_mise_a_jour_source` (si la source la déclare)
+- `date_mise_a_jour_source` (si la source la déclare pour l'artefact collecté)
+- `empreinte_artefact` (optionnel, format `sha256:<64 hex>` ; relie la preuve au snapshot)
+
+L'absence d'URL n'autorise pas à inventer une URL. L'absence de licence
+n'autorise pas à en déduire une. `empreinte_artefact` est une extension
+additive de PatrimoineEvidence v0.1, introduite pour l'ingestion Mérimée.
 
 L'absence d'URL n'autorise pas à inventer une URL. L'absence de licence
 n'autorise pas à en déduire une.

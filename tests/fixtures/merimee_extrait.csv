@@ -1,0 +1,11 @@
+Reference|Titre_editorial_de_la_notice|Denomination_de_l_edifice|Commune_forme_editoriale|Departement_format_numerique|COG_Insee_lors_de_la_protection|coordonnees_au_format_WGS84|Nature_de_la_protection|etat_de_conservation|Identifiant_Agregee|Date_de_la_derniere_mise_a_jour|Date_de_creation_de_la_notice|Date_et_typologie_de_la_protection|Statut_juridique_de_l_edifice|Precision_de_la_localisation|Precision_de_la_protection|Type_de_couverture|Materiaux_du_gros_oeuvre|Materiaux_de_la_couverture
+PA00094321|Basilique Saint-Sernin|église|Toulouse|31|31555|43.6083,1.4419|classé|restauré|ABC123|2026-07-24|1993-03-29|1840/07/24 : classé MH|propriété de l'Etat|précision localisation|précision protection|toit à longs pans|pierre|tuile
+PA00094322|Hôtel d'Assézat|hôtel|Toulouse|31|31555||arrêté||DEF456|2026-07-24|1993-03-29|1914/10/22 : classé MH|propriété privée||||
+PA00094323|Église|église|Commune-sans-cog|31||43.5,1.2|arrêté||GHI789|2026-07-24|1993-03-29|1920/01/01 : inscrit MH|||||
+PA00094324|Tour|tour|Toulouse|31|31555|invalide|arrêté||JKL012|2026-07-24|1993-03-29|1930/01/01 : inscrit MH|||||
+XX99999999|Édifice au format inattendu|édifice|Toulouse|31|31555|43.6,1.44|arrêté||MNO345|2026-07-24|1993-03-29|1950/01/01 : inscrit MH|||||
+PA00075000|Monument parisien|édifice|Paris|75|75056|48.85,2.35|classé||PARIS1|2026-07-24|1993-03-29|1862/01/01 : classé MH|||||
+PA00094321|Doublon Saint-Sernin|église|Toulouse|31|31555|43.6083,1.4419|classé||ABC124|2026-07-24|1993-03-29|1840/07/24 : classé MH|||||
+PA00094325|Chapelle sans état|chapelle|Muret|31|31395|43.46,1.32|arrêté|||2026-07-24|1993-03-29|1970/01/01 : inscrit MH|||||
+|Sans référence|édifice|Toulouse|31|31555|43.6,1.44|arrêté||VIDE01|2026-07-24|1993-03-29|1980/01/01 : inscrit MH|||||
+PA00094326|Coordonnées inversées|édifice|Toulouse|31|31555|1.44,43.60|arrêté||INV001|2026-07-24|1993-03-29|1985/01/01 : inscrit MH|||||

@@ -24,6 +24,10 @@ htmlcov/
 .tox/
 .cache/
 
+donnees/brutes/
+donnees/traitees/
+!donnees/README.md
+
 # Éditeur / OS
 .idea/
 .vscode/

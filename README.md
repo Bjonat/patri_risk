@@ -30,20 +30,19 @@ Une donnée absente signifie uniquement qu'aucune preuve correspondante
 n'a été trouvée dans les sources interrogées par la version actuelle.
 Elle ne signifie pas « aucun risque », « aucuns travaux » ou « bon état ».
 
-## État d'implémentation (PR-0)
+## État d'implémentation (PR-1)
 
 Disponible :
 
 - contrat de données **PatrimoineEvidence v0.1** ;
-- modèles `SourceDonnee`, `EnregistrementBrut`, `Preuve`,
-  `IdentiteMonument`, `DossierMonument` ;
-- CLI `patri-risk version` et `patri-risk diagnostic` ;
-- tests unitaires hors ligne.
+- modèles de preuve et de provenance ;
+- collecte reproductible du CSV national Mérimée ;
+- normalisation hors réseau des immeubles protégés de Haute-Garonne ;
+- CLI `patri-risk version`, `diagnostic`, `merimee collecter`, `merimee normaliser`.
 
 Non disponible, et non simulé :
 
-- ingestion Mérimée / POP ;
-- toute autre source (Géorisques, BDNB, INSEE, etc.) ;
+- Géorisques, BDNB, INSEE et les autres sources ;
 - indicateur dérivé, score de risque, score de vulnérabilité ;
 - application web, carte, API HTTP.
 
@@ -62,6 +61,23 @@ patri-risk version
 patri-risk diagnostic
 ```
 
+## Usage Mérimée (Haute-Garonne)
+
+```bash
+patri-risk merimee collecter
+```
+
+Puis, avec le snapshot et le manifeste produits :
+
+```bash
+patri-risk merimee normaliser \
+  --departement 31 \
+  --fichier donnees/brutes/merimee/<snapshot.csv>
+```
+
+Les artefacts runtime (CSV, JSONL) restent locaux et ne sont pas versionnés.
+Voir [docs/merimee.md](docs/merimee.md).
+
 ## Tests
 
 ```bash
@@ -77,6 +93,7 @@ ruff format --check .
 - [Architecture](docs/architecture.md)
 - [Contrat de données v0.1](docs/contrat-donnees-v0.1.md)
 - [Registre des sources](docs/sources.md)
+- [Ingestion Mérimée](docs/merimee.md)
 
 ## Feuille de route
 
@@ -90,8 +107,8 @@ ruff format --check .
 | PR-5 | Indicateurs de lacune d'information |
 | PR-6 | Expérimentation d'indicateurs de vulnérabilité externe |
 
-Séquencement révisable. PR-1 devra pouvoir brancher Mérimée sur les
-modèles de provenance et de preuve sans les remettre en cause.
+Séquencement révisable. PR-1 ingère Mérimée sans remettre en cause
+le modèle de provenance.
 
 ## Licence
 

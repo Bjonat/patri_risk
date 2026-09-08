@@ -30,19 +30,20 @@ données            dérivés
                 priorisation future
 ```
 
-## Périmètre réel de PR-0
+## Périmètre réel de PR-1
 
 ```text
-sources publiques
-→ adaptateurs
-→ données normalisées
-→ preuves
-→ dossier monument
+CSV officiel Mérimée
+→ snapshot + manifeste
+→ EnregistrementBrut
+→ adaptateur Mérimée
+→ Preuve
+→ DossierMonument
+→ JSONL Haute-Garonne
 ```
 
-Les adaptateurs et l'ingestion ne sont pas implémentés. Les paquets
-`patri_risk.sources` et `patri_risk.modeles` existent pour que PR-1
-puisse brancher Mérimée sans changer le modèle de provenance.
+La collecte est la seule étape réseau. La normalisation est hors ligne
+et rejouable sur un snapshot déjà collecté.
 
 Les niveaux « qualité des données », « indicateurs dérivés » et
 « priorisation » restent conceptuels. Aucun score n'est calculé.
@@ -116,10 +117,11 @@ Ces éléments rendent possible un audit ultérieur de toute conclusion.
    partir des preuves, jamais à la place des preuves.
 4. **Données brutes hors dossier.** `EnregistrementBrut` existe pour
    représenter un payload original. Il n'est **pas** un champ de
-   `DossierMonument`. À partir de PR-1, l'ingestion conservera
-   séparément l'artefact source brut et un manifeste de collecte.
-5. **CLI volontairement minimale.** `version` et `diagnostic`
-   seulement. Aucune commande `analyser` tant qu'aucune analyse n'existe.
+   `DossierMonument`. L'ingestion Mérimée conserve séparément l'artefact
+   CSV et un `ManifesteCollecte` (SHA-256, taille, URL, licence).
+   Chaque `SourceDonnee` peut porter `empreinte_artefact`.
+5. **CLI.** `version`, `diagnostic`, `merimee collecter`, `merimee normaliser`.
+   Aucune commande d'analyse multi-sources.
 6. **Dépendances limitées.** Runtime : Pydantic v2. Outils : pytest et
    ruff. Pas de framework web, pas d'ORM, pas d'orchestrateur.
 7. **`__main__.py`** permet `python -m patri_risk` en plus de la
@@ -156,24 +158,23 @@ licence lorsque connue
 ```
 
 Une preuve pourra ainsi être auditée contre le snapshot exact utilisé
-au moment du traitement. Ce mécanisme n'est pas implémenté dans PR-0.
+au moment du traitement. PR-1 implémente ce manifeste pour Mérimée.
 
 ## Emplacement des sources
 
-Le paquet `src/patri_risk/sources/` est réservé aux adaptateurs. PR-1
-devrait y ajouter un module Mérimée / POP qui :
+Le paquet `src/patri_risk/sources/merimee/` contient l'adaptateur :
 
-1. récupère un enregistrement public ;
-2. conserve l'artefact brut et son manifeste **en dehors** du dossier ;
-3. produit des `SourceDonnee` et des `Preuve` ;
-4. alimente un `DossierMonument` (identité + preuves uniquement).
+1. `collecte.py` télécharge le CSV en flux et écrit le manifeste ;
+2. `lecture.py` lit le snapshot local ;
+3. `normalisation.py` produit `DossierMonument` ;
+4. `pipeline.py` orchestre le département, la quarantaine des doublons
+   et les fichiers JSONL / rapport / anomalies.
 
-Aucune de ces étapes n'est exécutée dans PR-0.
+Aucune de ces étapes n'interroge Géorisques ni aucune autre source.
 
 ## Règles figées pour l'ingestion Mérimée (PR-1)
 
-Ces règles ne sont pas encore implémentées. Elles sont figées pour
-éviter de les ré-inventer dans PR-1.
+Détail d'inspection du CSV : [merimee.md](merimee.md).
 
 ### Référence
 
