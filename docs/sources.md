@@ -12,7 +12,7 @@ officiels connus, pas des garanties d'endpoint machine.
 
 | source | producteur | objectif | granularite | methode_jointure | statut_ouverture | fraicheur | statut_implementation | limitations_connues |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Mérimée / POP | Ministère de la Culture | identification des monuments historiques ; métadonnées patrimoniales publiques ; protection ; localisation ; informations descriptives disponibles | immeuble protégé / notice | identifiant Mérimée (`PA…`) ; éventuellement commune et coordonnées | données publiques patrimoniales ; licence et modalités d'export à vérifier avant implémentation | dépend de la mise à jour de la notice et du canal d'export ; à vérifier avant implémentation | prévu pour PR-1 | une notice n'est pas un diagnostic d'état ; localisation parfois manquante ou imprécise ; le nom n'est pas unique ; un monument n'équivaut pas toujours à un bâtiment |
+| Mérimée / POP | Ministère de la Culture | identification des monuments historiques ; métadonnées patrimoniales publiques ; protection ; localisation ; informations descriptives disponibles | immeuble protégé / notice | identifiant Mérimée (`PA…`) ; éventuellement commune et coordonnées | Licence Ouverte 2.0 ; CSV national via data.gouv | export CSV mis à jour régulièrement (hebdomadaire annoncé) ; GeoJSON plus ancien | **implémenté (PR-1)** | pas de colonne Code Insee courant ; localisation parfois manquante ; une notice n'est pas un diagnostic d'état ; le nom n'est pas unique |
 | Géorisques | Ministère chargé de la Transition écologique / BRGM selon les données | aléas naturels et environnementaux (inondation, retrait-gonflement des argiles, mouvements de terrain, cavités, séisme, PPR, CATNAT, etc.) | zonage, commune, ou parcelle selon le jeu | intersection spatiale ; éventuellement code INSEE | données publiques ; jeux, licences et API à vérifier avant implémentation | variable selon l'aléa ; à vérifier avant implémentation | prévu | l'exposition à un aléa n'est pas un diagnostic structurel ; la jointure spatiale peut être approximative si la géométrie du monument est pauvre |
 | BDNB | CSTB / partenaires de la BDNB (à confirmer selon le millésime) | enrichissement à l'échelle du bâtiment | bâtiment | correspondance spatiale ou identifiant bâtiment ; à vérifier avant implémentation | données ouvertes selon les millésimes ; licence et accès à vérifier avant implémentation | millésimée ; à vérifier avant implémentation | prévu | un monument historique ne correspond pas nécessairement à un unique bâtiment BDNB ; risque de fausse jointure |
 | INSEE | INSEE | contexte communal et territorial | commune, zonage administratif | code commune INSEE ; attention aux codes anciens | open data INSEE ; jeux précis à vérifier avant implémentation | selon le millésime et le recensement ou millésime administratif | prévu | le contexte territorial n'est pas un attribut du monument ; les codes commune évoluent |
@@ -25,12 +25,13 @@ officiels connus, pas des garanties d'endpoint machine.
 ### Mérimée / POP
 
 - Producteur : Ministère de la Culture.
-- Portail public connu : [https://www.pop.culture.gouv.fr/](https://www.pop.culture.gouv.fr/).
-- Endpoint d'export machine, format précis (JSON, CSV, API) et licence
-  de réutilisation : **à vérifier avant implémentation**.
-- Objectif dans ce projet : constituer l'identité de référence des
-  immeubles protégés et les premières preuves patrimoniales.
-- Statut : prévu pour PR-1.
+- Portail public : [https://www.pop.culture.gouv.fr/](https://www.pop.culture.gouv.fr/).
+- Dataset data.gouv : [immeubles protégés](https://www.data.gouv.fr/datasets/immeubles-proteges-au-titre-des-monuments-historiques-2).
+- Export machine : CSV national, URL stable
+  `https://www.data.gouv.fr/api/1/datasets/r/3a52af4a-f9da-4dcc-8110-b07774dfb3bc`.
+- Licence : Licence Ouverte / Open Licence version 2.0.
+- Détail d'inspection et règles d'adaptateur : [merimee.md](merimee.md).
+- Statut : **implémenté (PR-1)** pour le département 31.
 
 ### Géorisques
 
@@ -82,6 +83,6 @@ officiels connus, pas des garanties d'endpoint machine.
 
 ## Règle d'usage
 
-Une source listée ici n'est pas une source interrogée. Tant que
-`statut_implementation` n'est pas « implémenté », aucune conclusion
-du système ne peut s'appuyer sur elle.
+Une source listée ici n'est pas une source interrogée tant que
+`statut_implementation` n'est pas « implémenté ». Mérimée l'est pour
+le CSV national et le département 31.
