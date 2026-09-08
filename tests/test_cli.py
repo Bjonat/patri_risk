@@ -42,3 +42,12 @@ def test_commande_version_via_module() -> None:
 def test_commande_inconnue_renvoie_une_erreur() -> None:
     with pytest.raises(SystemExit):
         principal(["analyser"])
+
+
+def test_commande_merimee_fichier_introuvable(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    code = principal(["merimee", "normaliser", "--fichier", "absent-merimee.csv"])
+    erreur = capsys.readouterr().err
+    assert code == 1
+    assert "Le fichier Mérimée est introuvable." in erreur
